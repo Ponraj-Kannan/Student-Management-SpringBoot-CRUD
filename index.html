@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+        body{
+            width: 99%;
+            height: 95vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Noto Sans", sans-serif;
+            font-optical-sizing: auto;
+            font-size: .9rem;
+            font-style: normal;
+        }
+        .container {
+            width: 70%;
+            height: 95%;
+            padding: 5px;
+            background-color: rgba(255, 255, 255, 0.92);
+            border: 1px dotted #121212;
+        }
+
+        .scroll {
+            background-color: #eee;
+            width: 200px;
+            height: 200px;
+            overflow-y: scroll;
+        }
+
+        .scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scroll {
+            -ms-overflow-style: none; 
+            scrollbar-width: none;
+        }
+        
+        .title {
+            height: 18px; 
+            font-size: 1.2rem; 
+            text-align: center; 
+            font-weight: 500;
+            margin-top: 0px;
+        }
+
+        .editcontainer {
+            background-color: #adb6ba23; 
+            width: 100%; 
+            padding: 0px 0px 15px 0px;
+        }
+        .edittitle {
+            padding: 0px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px dotted #12121298;
+            margin-bottom: 10px;
+        }
+        .editinput {
+            padding: 0px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        .savebtn {
+            border: none; 
+            padding: 7px 12px; 
+            background-color: rgb(255, 255, 255); 
+            width: 71.5%; 
+            background-color: #007bff; 
+            color: #ffffff;
+        }
+        .savebtn:hover {
+            background-color: #0569d4;
+        }
+        .listcontainer{
+            width: 100%; 
+            height: 47%;
+        }
+
+        .item1, .item2, .item3, .item4, .item5 {
+            width: 10%; 
+            padding: 10px; 
+            text-align: center;
+        }
+        .editbtn{
+            border: none; 
+            background-color: #007bff; 
+            color: azure; padding: 10px 15px;
+        }
+        .deletebtn{
+            border: none; 
+            background-color: #dc3545; 
+            color: azure; padding: 10px 15px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="title">Student Management System (Spring CRUD)</p>
+        <div class="editcontainer">
+            <div class="edittitle">
+                <p>New / Edit Student</p>
+                <!-- <input type="text" id="id1" style="width: 10%; padding: 5px;" disabled> -->
+                <p id="id1">10</p>
+                <button onclick="addStudent()">+</button>
+            </div>
+            <div class="editinput">
+                <p>First Name</p>
+                <input id="first" type="text" style="width: 70%; padding: 5px;">
+            </div>
+            <div class="editinput">
+                <p>Last Name</p>
+                <input id="last" type="text" style="width: 70%; padding: 5px;">
+            </div>
+            <div class="editinput">
+                <p>Email Address</p>
+                <input id="mail" type="email" style="width: 70%; padding: 5px;">
+            </div>
+            <div style="padding: 0px 20px; display: flex; justify-content: right; align-items: right;">
+                <button class="savebtn" onclick="updateStudent()">Save</button>
+            </div>
+        </div>
+        <div class="listcontainer">
+            <table style="width: 100%; background-color: #adb6ba23;  margin-top: 15px; border-collapse: collapse;">
+                <tr style="background-color: #1212129c; color: #ffffff;">
+                    <td class="item1" style="width: 10%;">ID</td>
+                    <td class="item2" style="width: 20%">First Name</td>
+                    <td class="item3" style="width: 20%">Last Name</td>
+                    <td class="item4" style="width: 20%">Email Address</td>
+                    <td class="item5" style="width: 30%">Action</td>
+                </tr>
+            </table>
+            <div class="scroll" style="width: 100%; height: 230px;">
+                <table class="list" style="width: 100%; border-collapse: collapse;"></table>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        function load(){
+            fetch('http://localhost:8080/students')
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById('student-list');
+                let htmlData = "";
+                data.forEach(student => {
+                    htmlData += `<tr>
+                            <td class="item1" style="width: 10%;">${student.id}</td>
+                            <td class="item2" style="width: 20%">${student.first_name}</td>
+                            <td class="item3" style="width: 20%">${student.last_name}</td>
+                            <td class="item4" style="width: 20%">${student.email}</td>
+                            <td class="item5" style="width: 30%">
+                                <button class="editbtn" onclick='edit(${JSON.stringify(student)})'>Edit</button>
+                                <button class="deletebtn" onclick='del(${JSON.stringify(student)})'>Delete</button>
+                            </td>
+                        </tr>`;
+                });
+                document.getElementsByClassName('list')[0].innerHTML = htmlData;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+        function edit(student){
+            document.getElementById('first').value = student.first_name;
+            document.getElementById('last').value = student.last_name;
+            document.getElementById('mail').value = student.email;
+            document.getElementById('id1').innerHTML = student.id;
+        }
+
+        function del(student){
+            // Assuming you have a delete endpoint set up in your backend
+            fetch(`http://localhost:8080/student/${student.id}`, {
+                method: 'DELETE',
+            })
+            setInterval(() => {
+                load();
+            }, 500);
+        }
+
+        function updateStudent(){
+            const first = document.getElementById('first').value;
+            const last = document.getElementById('last').value;
+            const mail = document.getElementById('mail').value;
+            const id = document.getElementById('id1').value;
+
+           fetch(`http://localhost:8080/student`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: id,
+                    first_name: first,
+                    last_name: last,
+                    email: mail
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                load();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function addStudent(){
+            document.getElementById('id1').innerHTML = "";
+            document.getElementById('first').value = "";
+            document.getElementById('last').value = "";
+            document.getElementById('mail').value = "";
+        }
+        // Load the student list when the page loads
+
+        load();
+        
+    </script>
+</body>
+</html>
